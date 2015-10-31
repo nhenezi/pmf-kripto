@@ -1,7 +1,2 @@
- *.hi
- *.o
- *.swp
- *.tag
- *~
- *_flymake.hs
- .stack-work/
+.gitignore
+.stack-work
