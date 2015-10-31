@@ -1,6 +1,7 @@
 module Lib
 (
-  letters, letterFrequencies, alphaEncode, alphaDecode
+  letters, letterFrequencies, alphaEncode, alphaDecode, bigramFrequencies,
+  cesarEncode, cesarDecode, vigenerEncode
 ) where
 
 import Data.Function
@@ -71,3 +72,25 @@ alphaDecodeLetter a b c = case inverseMod26 a of
 -- | Decodes a text in alpha encoding with key (a, b)
 alphaDecode :: Integer -> Integer -> String -> Maybe String
 alphaDecode a b cyphertext = sequence $ alphaDecodeLetter a b <$> cyphertext
+
+-- | Encodes a character using Cesars decoding with key (a)
+cesarEncodeLetter :: Integer -> Char -> Char
+cesarEncodeLetter a c = d $ ((e c) + a) `mod` 26
+
+-- | Encodes a string using Cesars encryption with key (a)
+cesarEncode :: Integer -> String -> String
+cesarEncode a text = cesarEncodeLetter a <$> text
+
+-- | Decodes character using Cesars encryption with key (a)
+cesarDecodeLetter :: Integer -> Char -> Char
+cesarDecodeLetter a c = d $ ((e c) - a) `mod` 26
+
+-- | Decodes string using Cesars encryption with key (a)
+cesarDecode :: Integer -> String -> String
+cesarDecode a text = cesarDecodeLetter a <$> text
+
+-- | Encodes a string using Vigener cypher
+vigenerEncode :: String -> String -> String
+vigenerEncode key text = zipWith (\k t -> cesarEncodeLetter (e k) t) expandedKey text
+  where
+    expandedKey = take (length text) $ cycle key
