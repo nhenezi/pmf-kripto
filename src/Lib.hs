@@ -8,7 +8,6 @@ import Data.List
 import Data.Char
 import Data.Map (Map)
 import qualified Data.Map as Map
-import qualified Data.Vector as V
 
 -- | Letters used in plaintext
 letters :: Map Char Integer
