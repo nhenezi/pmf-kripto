@@ -32,6 +32,25 @@ letterFrequencies :: String -> [(Char, Integer)]
 letterFrequencies text = reverse $ sortBy (compare `on` snd) frequencies
   where frequencies = Map.toList $ Map.fromListWith (+) [(c, 1) | c <- text]
 
+-- | Calculates bigram frequency in a text. Ordered descending by number of occurances
+bigramFrequencies :: String -> [(String, Integer)]
+bigramFrequencies text = reverse $ sortBy (compare `on` snd) bigrams
+  where bigrams = concat [(\(x, y) -> ([c, x], y)) <$> (letterFrequenciesAfter c text) | c <- chars]
+        chars = fst <$> Map.toList letters
+
+-- | Returs a list of letters that occur after a character in a string
+lettersAfter :: Char -> String -> [Char]
+lettersAfter c [] = []
+lettersAfter c (x:xs)
+  | length xs == 0 = []
+  | x == c = head xs : lettersAfter c xs
+  | otherwise = lettersAfter c xs
+
+-- | Calculates frequency of letters after specific character in a string
+letterFrequenciesAfter :: Char -> String -> [(Char, Integer)]
+letterFrequenciesAfter c s = letterFrequencies letters
+  where letters = lettersAfter c s
+
 -- | Encodes a letter using alpha encoding with (a, b) key
 alphaEncodeLetter :: Integer -> Integer -> Char -> Char
 alphaEncodeLetter a b c = d $ ((e c) * a + b) `mod` 26
