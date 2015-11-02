@@ -1,7 +1,7 @@
 module Lib
 (
   letters, letterFrequencies, alphaEncode, alphaDecode, bigramFrequencies,
-  cesarEncode, cesarDecode, vigenerEncode
+  cesarEncode, cesarDecode, vigenerEncode, replaceLetters
 ) where
 
 import           Data.Char
@@ -29,12 +29,13 @@ d n = case find ((==n).snd) (Map.toList letters) of
 -- | Calculates frequency of each letter ordered descending by number of occurances
 letterFrequencies :: String -> [(Char, Integer)]
 letterFrequencies text =  sortBy (flip compare `on` snd) frequencies
-  where frequencies = Map.toList $ Map.fromListWith (+) [(c, 1) | c <- text]
+  where frequencies = Map.toList $ Map.fromListWith (+) [(toLower c, 1) | c <- text]
 
 -- | Calculates bigram frequency in a text. Ordered descending by number of occurances
 bigramFrequencies :: String -> [(String, Integer)]
 bigramFrequencies text =  sortBy (flip compare `on` snd) bigrams
-  where bigrams = concat [(\(x, y) -> ([c, x], y)) <$> letterFrequenciesAfter c text | c <- chars]
+  where bigrams = concat [(\(x, y) -> ([c, x], y)) <$> letterFrequenciesAfter c txt | c <- chars]
+        txt = toLower <$> text
         chars = fst <$> Map.toList letters
 
 -- | Returs a list of letters that occur after a character in a string
@@ -92,3 +93,13 @@ vigenerEncode :: String -> String -> String
 vigenerEncode key text = zipWith (\k t -> cesarEncodeLetter (e k) t) expandedKey text
   where
     expandedKey = take (length text) $ cycle key
+
+-- | Replaces a character using character map
+replaceLetter :: Map Char Char -> Char -> Char
+replaceLetter m c = fromMaybe ' ' (Map.lookup (toLower c) m)
+
+-- | Replaces characters in a string
+replaceLetters :: [(Char, Char)] -> String -> String
+replaceLetters replacements text = replaceLetter replMap <$> text
+  where
+    replMap = Map.fromList replacements
